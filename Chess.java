@@ -2,14 +2,16 @@ import java.util.*;
 import java.lang.*;
 
 public class Chess {
+    private int player;
     private String type;
-    private Position position;
-    Chess(String type, int x, int y){
+    // private Position position;
+    Chess(int player, String type){
+        this.player = player;
         this.type = type;
-        this.position = new Position(x, y);
+        // this.position = new Position(x, y);
     }
 
-    public boolean isMoveValid(Position move ){
+    public boolean isMoveValid(Position position, Position move ){
         boolean valid = false;
         int maxSteps = type == "sun" ? 1 : 2;
         int x = position.x;
@@ -41,5 +43,11 @@ public class Chess {
         }
 
         return valid;
+    }
+    public int getPlayer(){
+        return this.player;
+    }
+    public String getType(){
+        return this.type;
     }
 }
