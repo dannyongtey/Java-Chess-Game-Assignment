@@ -1,4 +1,6 @@
-public class Position{
+import java.io.*;
+
+public class Position implements Serializable{
     public int x;
     public int y;
     Position(int x, int y){
