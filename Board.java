@@ -173,11 +173,6 @@ public class Board implements ChangeListener{
         return board;
     }
 
-    public static void main(String[] args){
-        board.showBoard();
-        board.resetChess();
-    }
-
     public void showBoard(){
         frame.setVisible(true);
     }
