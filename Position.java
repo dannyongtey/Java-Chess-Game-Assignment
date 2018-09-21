@@ -1,5 +1,7 @@
 import java.io.*;
 
+// Indicates x and y coordinate of the chess
+// By: Prev Wong
 public class Position implements Serializable{
     public int x;
     public int y;

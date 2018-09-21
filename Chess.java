@@ -2,16 +2,18 @@ import java.util.*;
 import java.lang.*;
 import java.io.*;
 
+// Class for each chess
+// By: Prev Wong
 public class Chess implements Serializable{
     private int player;
     private String type;
-    // private Position position;
+
     Chess(int player, String type){
         this.player = player;
         this.type = type;
-        // this.position = new Position(x, y);
     }
 
+    // Return valid moves of this chess based on the map
     public ArrayList<Position> getValidMoves(Map<Position, Chess> map) {
         ArrayList<Position> validMove = new ArrayList<Position>();
         ArrayList<Position> possiblePositionList = new ArrayList<Position>();

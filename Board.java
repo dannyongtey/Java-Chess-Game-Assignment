@@ -13,29 +13,35 @@ public class Board implements ChangeListener{
     private Map<Position, Chess> map = new HashMap<>();
     private static Board board = new Board();
 
-    private Position selectedCoordinate; 
-    private int currentPlayer;
-    private ArrayList<Position> possibleValidMoves = new ArrayList<Position>();
-    private Chess currentChessSelected;
-    private int turnCount;
-    private boolean gameStatus;
-    private int[] chessCheckStatus = {0, 0};
+    private Position selectedCoordinate; // the chess coordinate player selected to be moved
+    private int currentPlayer; // indicate which player in turn to play
+    private ArrayList<Position> possibleValidMoves = new ArrayList<Position>(); // all possible moves of currently selected chess
+    private Chess currentChessSelected; // chess currently selected
+    private int turnCount; // number of turns have played
+    private boolean gameStatus; // game still playable (false when sun is captured)
+    private int[] chessCheckStatus = {0, 0}; // whether player 0 or player 1 is being checked
+    private boolean saveStatus = true; // indicates whether game has been saved
 
     private Board() {
         // Frame initialization
         frame = new JFrame("Myrmidon Chess");
-        // TODO: Add icon to game; implement window listener to listen to window close
         final int minFrameWidth = 700;
         final int minFrameHeight = 600;
         frame.setSize(minFrameWidth,minFrameHeight);
         frame.setMinimumSize(new Dimension(minFrameWidth, minFrameHeight));
         frame.setLayout(new GridLayout(6, 7));
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter(){
-            // TODO: On close check if board is saved
             @Override
             public void windowClosing(WindowEvent we) {
                 System.out.println("Closing window callback");
+
+                if(saveStatus == false) {
+                    showMessage("Please save before leaving");
+                }
+                else {
+                    System.exit(0);
+                }
             }
         });;
         // Menubar initialization
@@ -47,6 +53,12 @@ public class Board implements ChangeListener{
         newGame = new JMenuItem(new AbstractAction("New Game"){
             @Override
             public void actionPerformed(ActionEvent e) {
+                // If game is still playable and not yet saved
+                if(gameStatus && !saveStatus) {
+                    showMessage("Please save the game before you start a new game");
+                    return;
+                }
+
                 initVariable();
                 resetChess();
             }
@@ -82,6 +94,8 @@ public class Board implements ChangeListener{
         }
     }   
 
+    // Put all chessses into the board map in their initial position
+    // By: Danny Tey
     public void resetChess(){
         map = new HashMap<Position, Chess>();
         map.put(new Position(0,0), new Chess(1, "plus"));
@@ -101,6 +115,8 @@ public class Board implements ChangeListener{
         chessUIupdate();
     }
 
+    // Update the chess location on chess board based on map
+    // By: Danny Tey
     public void chessUIupdate(){
         for (int r = 0; r <= 5; r++){
             for (int c = 0; c <= 6; c++){
@@ -112,7 +128,7 @@ public class Board implements ChangeListener{
             Chess c = entry.getValue();
             int x = pos.x;
             int y = pos.y;
-            ImageIcon icon = new ImageIcon(c.getType() + "-" + c.getPlayer() + ".png");
+            ImageIcon icon = new ImageIcon("chessImage/" + c.getType() + "-" + c.getPlayer() + ".png");
             Image img = icon.getImage() ; 
             Image newimg = img.getScaledInstance( 100, 100,  java.awt.Image.SCALE_SMOOTH ) ; 
             ImageIcon newIcon = new ImageIcon(newimg);
@@ -120,6 +136,8 @@ public class Board implements ChangeListener{
         }
     }
 
+    // Update background color of selected chess as blue and yellow for possible moves
+    // By: Danny Tey and Yeo Yong Yaw
     public void selectionUIupdate(){
         for (int r = 0; r <= 5; r++){
             for (int c = 0; c <= 6; c++){
@@ -141,6 +159,8 @@ public class Board implements ChangeListener{
         System.out.println("----------------");
     }
 
+    // Reset all variable 
+    // By: Yeo Yong Yaw
     private void initVariable() {
         selectedCoordinate = null;
         currentPlayer = 0;
@@ -150,8 +170,10 @@ public class Board implements ChangeListener{
         gameStatus = true;
 
         selectionUIupdate();
-    }
+    }   
 
+    // Turn the board position when switching turn
+    // By: Danny Tey
     public void flipBoard() {
         Map<Position, Chess> temp = map;
         map = new HashMap<Position, Chess>();
@@ -165,18 +187,25 @@ public class Board implements ChangeListener{
         chessUIupdate();
     }
 
+    // Pop up a dialog box
+    // By: Danny Tey
     public void showMessage(String msg){
         JOptionPane.showMessageDialog(frame, msg);
     }
 
+    // Return the Board (Singleton)
+    // By: Danny Tey
     public static Board getBoard(){
         return board;
     }
 
+    // By: Danny Tey
     public void showBoard(){
         frame.setVisible(true);
     }
 
+    // Check if the move is in the array list of possibleValidMoves
+    // By: Yeo Yong Yaw
     public boolean isPossibleMove(Position movePos) {
         for(Position pos: possibleValidMoves) {
             if(movePos.x == pos.x && movePos.y == pos.y) {
@@ -186,6 +215,8 @@ public class Board implements ChangeListener{
         return false;
     }
 
+    // Change game state for next player
+    // By: Yeo Yong Yaw
     private void nextPlayer() {
         currentPlayer = currentPlayer == 0 ? 1 : 0;
         turnCount = currentPlayer == 0 ? (turnCount + 1) : turnCount;
@@ -195,11 +226,12 @@ public class Board implements ChangeListener{
         flipBoard();
         if((turnCount % 3) == 0 && currentPlayer == 0) {
             // swap chess
-            System.out.println("swap");
             swapChess();
         }
     }
 
+    // Swap 3 types of chess after each 3 rounds
+    // By: Yeo Yong Yaw
     private void swapChess() {
         for(Map.Entry<Position, Chess> entry: map.entrySet()) {
             Chess tempChess = entry.getValue();
@@ -222,6 +254,8 @@ public class Board implements ChangeListener{
         }
     }
 
+    // Check if game has ended by checking existance of "sun" chess in the map
+    // By: Yeo Yong Yaw
     private void isGameEnd() {
         int[] status = {0, 0};
         Chess tempChess;
@@ -241,35 +275,34 @@ public class Board implements ChangeListener{
         }
     }
 
+    // Check if current player move will check his/her opponent
+    // By: Yeo Yong Yaw
     private void isChessCheck() {
         ArrayList<Position> vm = new ArrayList<Position>();
         vm = currentChessSelected.getValidMoves(map);
-        System.out.println(vm);
 
         for(Position pos: vm) {
             if(map.get(pos) != null && map.get(pos).getType().equals("sun")) {
                 chessCheckStatus[currentPlayer] = 1;
 
-                System.out.println("Status: " + chessCheckStatus[0] + "Player: " + currentPlayer);
-                System.out.println("Status: " + chessCheckStatus[1] + "Player: " + currentPlayer);
                 return;
             }
         } 
 
         chessCheckStatus = new int[]{0, 0};
-        
     }
 
     // Button Event Change listener callback
     public void stateChanged(ChangeEvent e){
 		JButton tmp = (JButton)e.getSource();
 
+        // If each chess is being pressed and the game is still playable (no one has won)
 		if (tmp.getModel().isPressed() && gameStatus){
             String btnName = tmp.getName();
-            //System.out.println(btnName);
             String[] coor = btnName.split(",");
             Position tempPos = new Position(Integer.parseInt(coor[0]), Integer.parseInt(coor[1]));
 
+            // If previously have not selected one chess to be moved or the player changed his mind to choose another chess to be moved
             if(selectedCoordinate == null || !isPossibleMove(tempPos)) {
                 Chess tempChess = map.get(tempPos);
                 if(tempChess == null || tempChess.getPlayer() != currentPlayer) {
@@ -279,9 +312,10 @@ public class Board implements ChangeListener{
                 selectedCoordinate = tempPos;
                 possibleValidMoves = currentChessSelected.getValidMoves(map);
             }
+            // Selected a move coordinate
             else {
-                map.remove(selectedCoordinate);
-                map.put(tempPos, currentChessSelected);
+                map.remove(selectedCoordinate); // remove current chess from map
+                map.put(tempPos, currentChessSelected); // put the selected chess into desire location
 
                 nextPlayer();
                 chessUIupdate();
@@ -290,15 +324,17 @@ public class Board implements ChangeListener{
 
                 selectedCoordinate = null;
                 currentChessSelected = null;
-                possibleValidMoves.clear();
+                possibleValidMoves.clear(); // clear all possible moves of previous chess
             }
 
+            saveStatus = false;
             selectionUIupdate();
 		}
 		
 	}
 
-    // Save map
+    // Save the map, which player turns, total turn counts and game status (whether game has ended)
+    // By: Yeo Yong Yaw
     public void saveGame() {
         try {
             FileOutputStream fos = new FileOutputStream("map.ser");
@@ -307,13 +343,16 @@ public class Board implements ChangeListener{
             oos.writeObject(so);
             oos.close();
             fos.close();
+
+            saveStatus = true;
         }
         catch(IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Load map
+    // Load the map, which player turns, total turn counts and game status
+    // By: Yeo Yong Yaw
     public void loadGame() {
         try {
             FileInputStream fis = new FileInputStream("map.ser");
@@ -325,6 +364,7 @@ public class Board implements ChangeListener{
             currentPlayer = so.getCurrentPlayer();
             turnCount = so.getTurnCount();
             gameStatus = so.getGameStatus();
+            saveStatus = true;
 
             ois.close();
             fis.close();

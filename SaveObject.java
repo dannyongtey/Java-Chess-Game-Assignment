@@ -1,6 +1,8 @@
 import java.util.*;
 import java.io.*;
 
+// A class object that used for storing important details of the game then serialize it before saving.
+// By: Yeo Yong Yaw
 public class SaveObject implements Serializable{
 	private Map<Position, Chess> map;
 	private int currentPlayer;
