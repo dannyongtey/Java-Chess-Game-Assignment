@@ -1,5 +1,5 @@
-import java.io.*;
 import java.util.*;
+import java.io.*;
 
 public class SaveObject implements Serializable{
 	private Map<Position, Chess> map;
@@ -30,3 +30,4 @@ public class SaveObject implements Serializable{
 		return this.gameStatus;
 	}
 }
+

@@ -173,11 +173,14 @@ public class Board implements ChangeListener{
         return board;
     }
 
+<<<<<<< HEAD
     public static void main(String[] args){
         board.showBoard();
         board.resetChess();
     }
 
+=======
+>>>>>>> master
     public void showBoard(){
         frame.setVisible(true);
     }
@@ -197,8 +200,7 @@ public class Board implements ChangeListener{
 
         System.out.println("Current Player: " + currentPlayer);
         System.out.println("Turn Count: " + turnCount);
-        //flipBoard();
-
+        flipBoard();
         if((turnCount % 3) == 0 && currentPlayer == 0) {
             // swap chess
             System.out.println("swap");
