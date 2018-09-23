@@ -12,7 +12,6 @@ public class Board implements ChangeListener{
     private JButton[][] buttons = new JButton[6][7];
     private Map<Position, Chess> map = new HashMap<>();
     private static Board board = new Board();
-
     private Position selectedCoordinate; // the chess coordinate player selected to be moved
     private int currentPlayer; // indicate which player in turn to play
     private ArrayList<Position> possibleValidMoves = new ArrayList<Position>(); // all possible moves of currently selected chess
@@ -21,22 +20,25 @@ public class Board implements ChangeListener{
     private boolean gameStatus; // game still playable (false when sun is captured)
     private int[] chessCheckStatus = {0, 0}; // whether player 0 or player 1 is being checked
     private boolean saveStatus = true; // indicates whether game has been saved
+    private JLabel topMessage; // JLabel for top of the screen message
+    private String message = "";
 
-    private Board() {
-        // Frame initialization
-        frame = new JFrame("Myrmidon Chess");
+    // Private constructor To initialize the UI
+    // By: Danny Tey
+    private Board() {  
+        // Main Frame initialization
         final int minFrameWidth = 700;
         final int minFrameHeight = 600;
+        frame = new JFrame("Myrmidon Chess");  
         frame.setSize(minFrameWidth,minFrameHeight);
         frame.setMinimumSize(new Dimension(minFrameWidth, minFrameHeight));
-        frame.setLayout(new GridLayout(6, 7));
-        frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE); 
         frame.addWindowListener(new WindowAdapter(){
             @Override
             public void windowClosing(WindowEvent we) {
                 System.out.println("Closing window callback");
 
-                if(saveStatus == false) {
+                if(saveStatus == false && gameStatus) {
                     showMessage("Please save before leaving");
                 }
                 else {
@@ -82,6 +84,8 @@ public class Board implements ChangeListener{
         menu.add(loadGame);
         menuBar.add(menu);
         frame.setJMenuBar(menuBar);
+        JPanel chessPanel = new JPanel();
+        chessPanel.setLayout(new GridLayout(6,7));
         // Button initialization
         for (int r = 0; r <= 5; r++){
             for (int c = 0; c <= 6; c++){
@@ -89,14 +93,22 @@ public class Board implements ChangeListener{
                 buttons[r][c].setBackground(Color.WHITE);
                 buttons[r][c].setName(Integer.toString(r) + "," + Integer.toString(c));
                 buttons[r][c].addChangeListener(this);
-                frame.add(buttons[r][c]);
+                chessPanel.add(buttons[r][c]);
             }
         }
+        frame.add(chessPanel, BorderLayout.CENTER);
+
+        // Top level message initialization
+        message = "READY (CREATE NEW GAME OR LOAD GAME)";
+        topMessage = new JLabel(message);
+        topMessage.setHorizontalAlignment(SwingConstants.CENTER);
+        frame.add(topMessage, BorderLayout.PAGE_START);
+
     }   
 
     // Put all chessses into the board map in their initial position
     // By: Danny Tey
-    public void resetChess(){
+    private void resetChess(){
         map = new HashMap<Position, Chess>();
         map.put(new Position(0,0), new Chess(1, "plus"));
         map.put(new Position(0,1), new Chess(1, "triangle"));
@@ -112,12 +124,14 @@ public class Board implements ChangeListener{
         map.put(new Position(5,4), new Chess(0, "chevron"));
         map.put(new Position(5,5), new Chess(0, "triangle"));
         map.put(new Position(5,6), new Chess(0, "plus"));
+        message = "Player 1's turn";
         chessUIupdate();
     }
 
-    // Update the chess location on chess board based on map
+    // Update the chess location on chess board based on map, and also the top level message
     // By: Danny Tey
-    public void chessUIupdate(){
+    private void chessUIupdate(){
+        topMessage.setText(message);
         for (int r = 0; r <= 5; r++){
             for (int c = 0; c <= 6; c++){
                 buttons[r][c].setIcon(null);
@@ -138,7 +152,7 @@ public class Board implements ChangeListener{
 
     // Update background color of selected chess as blue and yellow for possible moves
     // By: Danny Tey and Yeo Yong Yaw
-    public void selectionUIupdate(){
+    private void selectionUIupdate(){
         for (int r = 0; r <= 5; r++){
             for (int c = 0; c <= 6; c++){
                 buttons[r][c].setBackground(Color.WHITE);
@@ -174,7 +188,7 @@ public class Board implements ChangeListener{
 
     // Turn the board position when switching turn
     // By: Danny Tey
-    public void flipBoard() {
+    private void flipBoard() {
         Map<Position, Chess> temp = map;
         map = new HashMap<Position, Chess>();
         for (Map.Entry<Position, Chess> entry : temp.entrySet()){
@@ -189,7 +203,7 @@ public class Board implements ChangeListener{
 
     // Pop up a dialog box
     // By: Danny Tey
-    public void showMessage(String msg){
+    private void showMessage(String msg){
         JOptionPane.showMessageDialog(frame, msg);
     }
 
@@ -206,7 +220,7 @@ public class Board implements ChangeListener{
 
     // Check if the move is in the array list of possibleValidMoves
     // By: Yeo Yong Yaw
-    public boolean isPossibleMove(Position movePos) {
+    private boolean isPossibleMove(Position movePos) {
         for(Position pos: possibleValidMoves) {
             if(movePos.x == pos.x && movePos.y == pos.y) {
                 return true;
@@ -218,6 +232,7 @@ public class Board implements ChangeListener{
     // Change game state for next player
     // By: Yeo Yong Yaw
     private void nextPlayer() {
+        
         currentPlayer = currentPlayer == 0 ? 1 : 0;
         turnCount = currentPlayer == 0 ? (turnCount + 1) : turnCount;
 
@@ -228,6 +243,7 @@ public class Board implements ChangeListener{
             // swap chess
             swapChess();
         }
+        message = "Player " + (currentPlayer+1) + "'s turn";
     }
 
     // Swap 3 types of chess after each 3 rounds
@@ -271,6 +287,8 @@ public class Board implements ChangeListener{
                 int player = i == 0 ? 2 : 1;
                 showMessage("Player " + player + " win!");
                 gameStatus = false;
+                message = "Player " + player + " win!";
+                chessUIupdate();
             }
         }
     }
@@ -278,13 +296,15 @@ public class Board implements ChangeListener{
     // Check if current player move will check his/her opponent
     // By: Yeo Yong Yaw
     private void isChessCheck() {
+        
         ArrayList<Position> vm = new ArrayList<Position>();
         vm = currentChessSelected.getValidMoves(map);
 
         for(Position pos: vm) {
             if(map.get(pos) != null && map.get(pos).getType().equals("sun")) {
                 chessCheckStatus[currentPlayer] = 1;
-
+                System.out.println("Check");
+                message += " (CHECK)"; 
                 return;
             }
         } 
@@ -318,8 +338,8 @@ public class Board implements ChangeListener{
                 map.put(tempPos, currentChessSelected); // put the selected chess into desire location
 
                 nextPlayer();
-                chessUIupdate();
                 isChessCheck();
+                chessUIupdate();
                 isGameEnd();
 
                 selectedCoordinate = null;
@@ -335,7 +355,7 @@ public class Board implements ChangeListener{
 
     // Save the map, which player turns, total turn counts and game status (whether game has ended)
     // By: Yeo Yong Yaw
-    public void saveGame() {
+    private void saveGame() {
         try {
             FileOutputStream fos = new FileOutputStream("map.ser");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -353,7 +373,7 @@ public class Board implements ChangeListener{
 
     // Load the map, which player turns, total turn counts and game status
     // By: Yeo Yong Yaw
-    public void loadGame() {
+    private void loadGame() {
         try {
             FileInputStream fis = new FileInputStream("map.ser");
             ObjectInputStream ois = new ObjectInputStream(fis);
