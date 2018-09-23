@@ -2,7 +2,7 @@ import java.util.*;
 import java.lang.*;
 import java.io.*;
 
-// Class for each chess
+// Class for each chess. Used to represent all chess pieces. Contains methods to determine if a move is valid.
 // By: Prev Wong
 public class Chess implements Serializable{
     private int player;
@@ -160,7 +160,8 @@ public class Chess implements Serializable{
 
         return validMove;
     }
-
+    // By: Prev Wong
+    // Check if moving the chess from one position to another selected one is valid.
     public boolean isMoveValid(Position position, Position move ){
         boolean valid = false;
         int maxSteps = type == "sun" ? 1 : 2;
@@ -194,19 +195,19 @@ public class Chess implements Serializable{
 
         return valid;
     }
-
+    // By: Prev Wong
     public int getPlayer(){
         return this.player;
     }
-
+    // By: Prev Wong
     public String getType(){
         return this.type;
     }
-
+    // By: Prev Wong
     public void setType(String type) {
         this.type = type;
     }
-
+    // By: Prev Wong
     @Override
     public String toString() {
         return "Chess: " + this.type + " Player: " + this.player;

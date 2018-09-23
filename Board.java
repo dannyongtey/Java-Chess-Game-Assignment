@@ -7,6 +7,7 @@ import java.io.*;
 
 
 // Singleton design pattern that returns only the chess board
+// Board class. The class that represents the Myrmidon Chess Board. It contains the UI elements, as well as the program logic.
 public class Board implements ChangeListener{
     private JFrame frame;
     private JButton[][] buttons = new JButton[6][7];
